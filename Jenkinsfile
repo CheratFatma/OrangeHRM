@@ -14,6 +14,13 @@ pipeline {
 
     stages {
 
+        stage('Start Selenium') {
+            steps {
+                sh 'docker compose up -d'
+                sh 'docker compose ps'
+            }
+        }
+
         stage('Build') {
             steps {
                 sh 'mvn clean compile'
@@ -21,6 +28,13 @@ pipeline {
         }
 
         stage('Tests Selenium') {
+            agent {
+                docker {
+                    image 'maven:3.8.3-openjdk-17'
+                    args "--entrypoint='' --shm-size=2g --network=selenium-network"
+                    reuseNode true
+                }
+            }
             steps {
                 script {
 
@@ -78,6 +92,8 @@ pipeline {
                     )
                 }
             }
+            // arrêter Selenium après les tests
+            sh 'docker compose down || true'
         }
 
         success {
