@@ -5,6 +5,7 @@ import java.net.URL;
 import java.time.Duration;
 
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxOptions;
@@ -24,6 +25,7 @@ public class baseTest {
 
     @Before 
     public void setUp(){
+        
         String nav = System.getProperty("browser", "chrome");
 
         try {
@@ -56,6 +58,8 @@ public class baseTest {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+        
+        //driver = new ChromeDriver();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10)); 
         lp = new loginPage(driver);
         dp = new dashboardPage(driver);

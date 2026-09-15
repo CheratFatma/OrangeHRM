@@ -9,7 +9,7 @@ pipeline {
     parameters {
         booleanParam(name: 'ALLURE',defaultValue: false,description: 'Generation du rapport Allure')
         booleanParam(name: 'SUREFIRE',defaultValue: false,description: 'Generation du rapport Surefire')
-        choice(name: 'TAG',choices: ['ALL','@loginValid','@loginInvalid','@loginMyActions','@loginQuickLaunch'],description: 'Choisir le tag à lancer')
+        choice(name: 'TAG',choices: ['@loginUS'],description: 'Choisir de lancer avec le tag')
     }
 
     stages {

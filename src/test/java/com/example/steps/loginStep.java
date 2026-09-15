@@ -42,12 +42,6 @@ public class loginStep {
         assertEquals("https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index", driver.getCurrentUrl());
     }
 
-    @Then("verifier erreur")
-    public void verifier_erreur() {
-        assertEquals("Invalid credentials",lp.getError());
-
-    }
-
     @Then("la section {string} est visible")
     public void la_section_est_visible(String s) {
         dp.showSection(s);

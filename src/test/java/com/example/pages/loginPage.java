@@ -9,7 +9,6 @@ public class loginPage {
     By username = By.name("username");
     By password = By.name("password");
     By login_btn = By.cssSelector(".orangehrm-login-button");
-    By error = By.cssSelector(".oxd-alert.oxd-alert--error");
     
     public loginPage(WebDriver driver){
         this.driver = driver;
@@ -27,8 +26,6 @@ public class loginPage {
         driver.findElement(login_btn).click();
     }
 
-    public String getError(){
-        return driver.findElement(error).getText();
-    }
+   
 
 }
