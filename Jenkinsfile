@@ -9,6 +9,24 @@ pipeline {
 
     stages {
 
+        stage('Check environment') {
+            steps {
+                sh '''
+                    echo "=== JAVA ==="
+                    java -version
+
+                    echo "=== MAVEN ==="
+                    mvn -version
+
+                    echo "=== JAVA_HOME ==="
+                    echo $JAVA_HOME
+
+                    echo "=== PATH ==="
+                    echo $PATH
+                '''
+            }
+        }
+
         stage('Checkout') {
             steps {
                 checkout scm
