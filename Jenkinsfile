@@ -1,5 +1,4 @@
 pipeline {
-
     agent any
 
     parameters {
@@ -10,104 +9,30 @@ pipeline {
 
     stages {
 
-        stage('global stage') {
-
-            agent {
-                docker {
-                    image 'maven:3.9.9-eclipse-temurin-17'
-                    args '-u root --entrypoint='
-                }
+        stage('Checkout') {
+            steps {
+                checkout scm
             }
+        }
 
-            stages {
+        stage('Build') {
+            steps {
+                sh 'mvn clean compile'
+            }
+        }
 
-                stage('installer dependencies') {
-                    steps {
-                        sh 'mvn dependency:resolve'
-                    }
-                }
+        stage('Tests Selenium') {
+            steps {
+                script {
 
-                stage('clean reports') {
-                    steps {
-                        sh '''
-                            echo "Suppression des anciens rapports..."
+                    if (params.TAG == 'ALL') {
 
-                            rm -rf allure-results
-                            rm -rf cypress/reports
+                        sh 'mvn test -Dbrowser=chrome'
 
-                            mkdir -p allure-results
-                            mkdir -p cypress/reports
+                    } else {
 
-                            echo "Dossiers nettoyes avec succes"
-                        '''
-                    }
-                }
+                        sh "mvn test -Dbrowser=chrome -Dcucumber.filter.tags='${params.TAG}'"
 
-                stage('run Selenium tests') {
-                    steps {
-                        script {
-
-                            if (params.TAG == 'ALL') {
-
-                                sh 'mvn test'
-
-                            } else {
-
-                                sh "mvn test -Dcucumber.filter.tags='${params.TAG}'"
-
-                            }
-                        }
-                    }
-                }
-
-                stage('generate Surefire report') {
-
-                    when {
-                        expression {
-                            return params.SUREFIRE
-                        }
-                    }
-
-                    steps {
-
-                        sh '''
-                            echo "=== SUREFIRE REPORT ==="
-
-                            ls -la target/reports
-
-                            echo "=== SUREFIRE HTML ==="
-
-                            ls -la target/reports/surefire.html
-                        '''
-
-                        stash(
-                            name: 'surefire-report',
-                            includes: 'target/reports/**/*'
-                        )
-                    }
-                }
-
-                stage('check allure results') {
-
-                    when {
-                        expression {
-                            return params.ALLURE
-                        }
-                    }
-
-                    steps {
-
-                        sh '''
-                            echo "=== ALLURE RESULTS ==="
-                            ls -la allure-results
-
-                            echo "=== RESULT JSON ==="
-                            cat allure-results/*-result.json
-
-                            echo "=== END ==="
-                        '''
-
-                        stash name: 'allure-results', includes: 'allure-results/**/*'
                     }
                 }
             }
@@ -120,43 +45,50 @@ pipeline {
 
             script {
 
-                if (params.ALLURE) {
-
-                    unstash 'allure-results'
-
-                    archiveArtifacts(
-                        artifacts: 'allure-results/**/*',
-                        allowEmptyArchive: true
-                    )
-
-                    allure(
-                        includeProperties: false,
-                        jdk: '',
-                        results: [[path: 'allure-results/']]
-                    )
-                }
-
+                // Rapport Surefire uniquement si SUREFIRE est coché
                 if (params.SUREFIRE) {
 
-                    echo "=== PUBLICATION DU RAPPORT SUREFIRE ==="
+                    echo '=== RAPPORT SUREFIRE ==='
 
-                    unstash 'surefire-report'
+                    junit(
+                        testResults: 'target/surefire-reports/*.xml',
+                        allowEmptyResults: true
+                    )
 
                     archiveArtifacts(
                         artifacts: 'target/reports/**/*',
                         allowEmptyArchive: true
                     )
+                }
 
-                    publishHTML([
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'target/reports',
-                        reportFiles: 'surefire.html',
-                        reportName: 'Surefire Report'
+                // Rapport Allure uniquement si ALLURE est coché
+                if (params.ALLURE) {
+
+                    echo '=== RAPPORT ALLURE ==='
+
+                    allure([
+                        includeProperties: false,
+                        results: [
+                            [path: 'target/allure-results']
+                        ]
                     ])
+
+                    archiveArtifacts(
+                        artifacts: 'target/allure-results/**/*',
+                        allowEmptyArchive: true
+                    )
                 }
             }
         }
+
+        success {
+            echo 'Pipeline terminée avec succès'
+        }
+
+        failure {
+            echo 'Les tests Selenium ont échoué'
+        }
     }
 }
+
+
