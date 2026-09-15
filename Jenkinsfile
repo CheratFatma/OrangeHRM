@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    tools {
+        jdk 'JDK8'
+        maven 'Maven3'
+    }
+
     parameters {
         booleanParam(name: 'ALLURE',defaultValue: false,description: 'Generation du rapport Allure')
         booleanParam(name: 'SUREFIRE',defaultValue: false,description: 'Generation du rapport Surefire')
@@ -8,30 +13,6 @@ pipeline {
     }
 
     stages {
-
-        stage('Check environment') {
-            steps {
-                sh '''
-                    echo "=== JAVA ==="
-                    java -version
-
-                    echo "=== MAVEN ==="
-                    mvn -version
-
-                    echo "=== JAVA_HOME ==="
-                    echo $JAVA_HOME
-
-                    echo "=== PATH ==="
-                    echo $PATH
-                '''
-            }
-        }
-
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
 
         stage('Build') {
             steps {
