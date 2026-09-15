@@ -29,7 +29,7 @@ public class baseTest {
 
         try {
 
-            URL gridUrl = new URL("http://selenium-hub-2:4444");
+            URL gridUrl = new URL("http://selenium-hub-3:4444");
 
             switch (nav.toLowerCase()) {
 
