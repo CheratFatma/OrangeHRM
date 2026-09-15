@@ -22,7 +22,6 @@ public class baseTest {
     public static dashboardPage dp;
 
 
-
     @Before 
     public void setUp(){
         String nav = System.getProperty("browser", "chrome");
